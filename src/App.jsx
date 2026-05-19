@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import { supabase } from './supabase'
 /* ══════════════════════════════════════════════════════════════════
    ANIMATION ENGINE
@@ -25,15 +26,15 @@ const ANIM = `
    DESIGN TOKENS
 ══════════════════════════════════════════════════════════════════ */
 const T = {
-  bg:"#030c18", grid:"rgba(0,229,255,0.03)", surface:"rgba(0,15,40,0.8)",
-  glass:"rgba(0,80,160,0.08)", border:"rgba(0,229,255,0.12)", borderAm:"rgba(255,171,0,0.14)",
-  cyan:"#00e5ff", cyanD:"rgba(0,229,255,0.5)", cyanDim:"rgba(0,229,255,0.12)",
-  amber:"#ffab00", amberD:"rgba(255,171,0,0.5)", amberDim:"rgba(255,171,0,0.12)",
+  bg:"#06111f", grid:"rgba(0,229,255,0.03)", surface:"rgba(8,22,40,0.88)",
+  glass:"rgba(40,90,140,0.06)", border:"rgba(0,229,255,0.12)", borderAm:"rgba(255,171,0,0.14)",
+  cyan:"#3bc9db", cyanD:"rgba(0,229,255,0.5)", cyanDim:"rgba(59,201,255,0.10)",
+  amber:"#d9a441", amberD:"rgba(255,171,0,0.5)", amberDim:"rgba(255,171,0,0.12)",
   green:"#00e676", greenD:"rgba(0,230,118,0.5)", greenDim:"rgba(0,230,118,0.1)",
   red:"#ff3d71", redD:"rgba(255,61,113,0.5)", redDim:"rgba(255,61,113,0.1)",
   violet:"#a07aff",
-  txt:"rgba(200,225,245,0.9)", txtD:"rgba(160,195,230,0.55)", txtB:"#e8f4ff",
-  mono:"'Courier New',monospace",
+  txt:"rgba(210,225,24,0.82)", txtD:"rgba(150,175,205,0.52)", txtB:"#e8f4ff",
+  mono:"'Inter', sans-serif",
 };
 
 /* ══════════════════════════════════════════════════════════════════
@@ -189,11 +190,11 @@ function Radar({scores}) {
       <polygon points={str(poly)} fill="rgba(0,229,255,.10)" stroke={T.cyan} strokeWidth={1.5}/>
       {poly.slice(0,4).map(([x,y],i)=>(
         <circle key={i} cx={x} cy={y} r={vals[i]>.05?5:2} fill="#00e5ff" opacity={.9}
-          style={{filter:"drop-shadow(0 0 5px #00e5ff)"}}/>
+          style={{filter:"drop-shadow(0 0 2px #00e5ff)"}}/>
       ))}
       {poly.slice(4).map(([x,y],i)=>(
         <circle key={i} cx={x} cy={y} r={vals[i+4]>.05?5:2} fill="#ffab00" opacity={.9}
-          style={{filter:"drop-shadow(0 0 5px #ffab00)"}}/>
+          style={{filter:"drop-shadow(0 0 2px #ffab00)"}}/>
       ))}
       {Array.from({length:N},(_,i)=>{
         const [x,y]=pt(i,R+22);
@@ -302,7 +303,7 @@ function DepGraph({scores,status}) {
 function Ring({val,label,sub,color,size=80}) {
   const r=30,circ=2*Math.PI*r,off=circ*(1-val/100);
   return(
-    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,borderRadius:16}}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,.05)" strokeWidth={5}/>
         <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={5}
@@ -397,10 +398,10 @@ function CommandCenter({scores,status}) {
   const weak=DOMAINS.filter(d=>!status.locked[d.id]).sort((a,b)=>(scores[a.id]||0)-(scores[b.id]||0))[0];
 
   const KPI=({val,label,color,blink})=>(
-    <div style={{textAlign:"center",padding:"10px 14px",borderRight:`1px solid ${T.border}`,
+    <div style={{textAlign:"center",padding:"6px 10px",borderRight:`1px solid ${T.border}`,
       animation:blink?"riskpls 2s ease-in-out infinite":"none",flex:1}}>
-      <div style={{fontSize:22,fontWeight:900,color,fontFamily:T.mono,
-        textShadow:`0 0 20px ${color}`}}>{val}</div>
+      <div style={{fontSize:18,fontWeight:900,color,fontFamily:T.mono,
+        textShadow:`0 0 6px ${color}`}}>{val}</div>
       <div style={{fontSize:8,color:T.txtD,fontFamily:T.mono,letterSpacing:1.5,marginTop:3}}>{label}</div>
     </div>
   );
@@ -429,7 +430,7 @@ function CommandCenter({scores,status}) {
         borderBottom:`1px solid ${T.border}`}}>
         {/* Radar */}
         <div style={{borderRight:`1px solid ${T.border}`,padding:"16px 8px",
-          background:"rgba(0,229,255,.015)"}}>
+          background:"rgba(0,229,255,.015)",borderRadius:16}}>
           <div style={{fontSize:9,color:T.cyanD,fontFamily:T.mono,letterSpacing:2,marginBottom:4,padding:"0 8px"}}>
             ◈ COMPETENCY RADAR · DUAL DOMAIN
           </div>
@@ -446,7 +447,7 @@ function CommandCenter({scores,status}) {
 
         {/* Dependency graph + Alerts */}
         <div style={{display:"flex",flexDirection:"column"}}>
-          <div style={{padding:"12px 12px 4px",borderBottom:`1px solid ${T.border}`,flex:1}}>
+          <div style={{padding:"12px 12px 4px",borderBottom:`1px solid ${T.border}`,flex:1,borderRadius:16}}>
             <div style={{fontSize:9,color:T.cyanD,fontFamily:T.mono,letterSpacing:2,marginBottom:6}}>
               ◈ ENGINEERING DEPENDENCY NETWORK
             </div>
@@ -458,12 +459,12 @@ function CommandCenter({scores,status}) {
       {/* Rings + Pipeline */}
       <div style={{display:"grid",gridTemplateColumns:"auto 1fr",borderBottom:`1px solid ${T.border}`}}>
         <div style={{display:"flex",gap:24,padding:"16px 24px",borderRight:`1px solid ${T.border}`,
-          alignItems:"center"}}>
+          alignItems:"center",borderRadius:16}}>
           <Ring val={ori} label="OFFSHORE RI" color={T.cyan} sub="65% WEIGHT"/>
           <Ring val={oni} label="ONSHORE RI" color={T.amber} sub="35% WEIGHT"/>
           <Ring val={auth} label="AUTHORITY" color={auth>=60?T.green:T.cyan} sub="COMPOSITE"/>
         </div>
-        <div style={{padding:"16px 20px"}}>
+        <div style={{padding:"16px 20px",borderRadius:16}}>
           <div style={{fontSize:9,color:T.cyanD,fontFamily:T.mono,letterSpacing:2,marginBottom:10}}>
             ◈ EPC WORKFLOW TELEMETRY
           </div>
@@ -480,7 +481,7 @@ function CommandCenter({scores,status}) {
           </div>
           {risks.length===0?(
             <div style={{fontSize:11,color:T.green,fontFamily:T.mono,padding:12,
-              border:`1px solid ${T.greenD}`,borderRadius:6,background:T.greenDim}}>
+              border:`1px solid ${T.greenD}`,borderRadius:6,background:T.greenDim,borderRadius:16}}>
               ALL SYSTEMS NOMINAL — No critical dependency failures detected
             </div>
           ):risks.map((r,i)=>(
@@ -494,7 +495,7 @@ function CommandCenter({scores,status}) {
             </div>
           ))}
         </div>
-        <div style={{padding:"14px 16px"}}>
+        <div style={{padding:"14px 16px",borderRadius:16}}>
           <div style={{fontSize:9,color:T.violet,fontFamily:T.mono,letterSpacing:2,marginBottom:10}}>
             ◈ AI MENTOR INTELLIGENCE
           </div>
@@ -555,7 +556,7 @@ function ReviewOps() {
     <div style={{animation:"fadein .5s ease-out"}}>
       {/* Header */}
       <div style={{padding:"14px 20px",borderBottom:`1px solid ${T.border}`,
-        background:"rgba(120,60,0,.06)"}}>
+        background:"rgba(120,60,0,.06)",borderRadius:16}}>
         <div style={{fontSize:9,color:T.amber,fontFamily:T.mono,letterSpacing:2,marginBottom:4}}>
           ◈ TECHNICAL REVIEW OPERATIONS · AI EVALUATION ENGINE
         </div>
@@ -593,7 +594,7 @@ function ReviewOps() {
             {scen.doc}
           </div>
           <div style={{marginTop:12,padding:"8px 12px",background:"rgba(255,171,0,.06)",
-            border:`1px solid ${T.borderAm}`,borderRadius:6,fontSize:10,color:T.amber,fontFamily:T.mono}}>
+            border:`1px solid ${T.borderAm}`,borderRadius:12,fontSize:10,color:T.amber,fontFamily:T.mono}}>
             ⚠ Identify all engineering deficiencies. Classify severity. Cite applicable codes. Write as a Technical Authority.
           </div>
         </div>
@@ -606,7 +607,7 @@ function ReviewOps() {
           <textarea value={input} onChange={e=>setInput(e.target.value)}
             placeholder={`Enter your technical review comments here...\n\nExample format:\n1. [MAJOR] Wave height discrepancy: Hs applied = X does not match design basis...\n   Code reference: API RP 2A Section Y\n\n2. [MINOR] Cover specification...`}
             style={{flex:1,minHeight:180,background:"rgba(0,10,30,.9)",
-              border:`1px solid ${input.length>50?T.cyanD:T.border}`,borderRadius:6,
+              border:`1px solid ${input.length>50?T.cyanD:T.border}`,borderRadius:12,
               color:T.txt,fontFamily:T.mono,fontSize:11,padding:14,lineHeight:1.8,
               outline:"none",transition:"border-color .3s"}}/>
           <button onClick={evaluate} disabled={loading||!input.trim()}
@@ -621,7 +622,7 @@ function ReviewOps() {
           {result&&!result.error&&(
             <div style={{animation:"fadein .4s ease-out"}}>
               {/* Verdict */}
-              <div style={{padding:"10px 14px",borderRadius:6,marginBottom:10,
+              <div style={{padding:"10px 14px",borderRadius:12,marginBottom:10,
                 border:`1px solid ${result.verdict==="PASS"?T.greenD:result.verdict==="CONDITIONAL PASS"?T.amberD:T.redD}`,
                 background:result.verdict==="PASS"?T.greenDim:result.verdict==="CONDITIONAL PASS"?T.amberDim:T.redDim}}>
                 <div style={{fontSize:11,fontWeight:"bold",fontFamily:T.mono,
@@ -713,7 +714,7 @@ function DomainOps({scores,setScores,status}) {
     const warned=status.warned[d.id];
     const sc2=locked?T.red:warned?T.amber:s>=60?T.green:s>=25?T.cyan:"rgba(100,150,200,.4)";
     return(
-      <div style={{marginBottom:16,padding:"12px 14px",borderRadius:8,
+      <div style={{marginBottom:16,padding:"12px 14px",borderRadius:14,
         border:`1px solid ${sc2}25`,background:`${sc2}05`,
         animation:locked?"riskpls 2s ease-in-out infinite":warned?"ambpls 3s ease-in-out infinite":"none"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
@@ -726,8 +727,8 @@ function DomainOps({scores,setScores,status}) {
               DEPENDENCY WARNING — prerequisite competency low
             </div>}
           </div>
-          <div style={{fontSize:24,fontWeight:900,color:sc2,fontFamily:T.mono,
-            textShadow:`0 0 15px ${sc2}`,minWidth:52,textAlign:"right"}}>{s}%</div>
+          <div style={{fontSize:18,fontWeight:900,color:sc2,fontFamily:T.mono,
+            textShadow:`0 0 5px ${sc2}`,minWidth:52,textAlign:"right"}}>{s}%</div>
         </div>
         <input type="range" min={0} max={100} value={s} disabled={locked}
           onChange={e=>setScores(p=>({...p,[d.id]:+e.target.value}))}
@@ -782,7 +783,7 @@ function DomainOps({scores,setScores,status}) {
               ◈ SHARED SYSTEMS
             </div>
             {DOMAINS.filter(d=>d.domain==="shared").map(d=><SliderRow key={d.id} d={d}/>)}
-            <div style={{marginTop:20,padding:"14px",borderRadius:8,
+            <div style={{marginTop:20,padding:"14px",borderRadius:14,
               border:`1px solid ${T.border}`,background:"rgba(0,10,30,.6)"}}>
               <div style={{fontSize:9,color:T.cyanD,fontFamily:T.mono,letterSpacing:2,marginBottom:8}}>
                 READINESS SUMMARY
@@ -838,13 +839,13 @@ function EPCWorkflow({scores,status}) {
                   cursor:"pointer",minWidth:80,padding:"8px 4px",
                   background:isAct?`${sc2}15`:"transparent",
                   border:isAct?`1px solid ${sc2}50`:"1px solid transparent",
-                  borderRadius:8,transition:"all .2s"}}>
+                  borderRadius:14,transition:"all .2s"}}>
                 <div style={{width:44,height:44,borderRadius:"50%",
                   border:`2px solid ${sc2}`,background:`${sc2}12`,
                   display:"flex",alignItems:"center",justifyContent:"center",
                   filter:isA?`drop-shadow(0 0 8px ${sc2})`:"none",
                   marginBottom:8,transition:"all .4s"}}>
-                  <div style={{fontSize:16,color:sc2,fontFamily:T.mono,
+                  <div style={{fontSize:12,color:sc2,fontFamily:T.mono,
                     animation:isA?"gpulse 2s ease-in-out infinite":"none"}}>{i+1}</div>
                 </div>
                 <div style={{fontSize:8,color:sc2,fontFamily:T.mono,textAlign:"center",
@@ -886,7 +887,7 @@ function EPCWorkflow({scores,status}) {
       </div>
 
       {active&&activeInfo&&(
-        <div style={{margin:"0 20px 20px",padding:"14px 16px",borderRadius:8,animation:"fadein .3s ease-out",
+        <div style={{margin:"0 20px 20px",padding:"14px 16px",borderRadius:14,animation:"fadein .3s ease-out",
           border:`1px solid ${activeDomain==="offshore"?T.cyanD:T.amberD}`,
           background:`rgba(0,10,30,.8)`}}>
           <div style={{fontSize:9,color:activeDomain==="offshore"?T.cyan:T.amber,
@@ -979,31 +980,31 @@ function AuthorityMatrix({scores,status}) {
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",borderBottom:`1px solid ${T.border}`}}>
-        <div style={{padding:"20px",borderRight:`1px solid ${T.border}`}}>
+        <div style={{padding:"20px",borderRadius:16,borderRight:`1px solid ${T.border}`}}>
           <div style={{fontSize:9,color:T.violet,fontFamily:T.mono,letterSpacing:2,marginBottom:16}}>
             CURRENT STATUS
           </div>
-          <div style={{textAlign:"center",marginBottom:20}}>
-            <div style={{fontSize:52,fontWeight:900,color:current.c,fontFamily:T.mono,
-              textShadow:`0 0 30px ${current.c}`,lineHeight:1}}>{auth}%</div>
-            <div style={{fontSize:16,color:current.c,fontFamily:T.mono,fontWeight:"bold",marginTop:8,letterSpacing:2}}>
+          <div style={{textAlign:"center",marginBottom:12}}>
+            <div style={{fontSize:36,fontWeight:900,color:current.c,fontFamily:T.mono,
+              textShadow:`0 0 8px ${current.c}`,lineHeight:1}}>{auth}%</div>
+            <div style={{fontSize:13,color:current.c,fontFamily:T.mono,fontWeight:"bold",marginTop:8,letterSpacing:2}}>
               {current.label}
             </div>
             <div style={{fontSize:11,color:T.txtD,fontFamily:T.mono,marginTop:4}}>{current.sub}</div>
           </div>
           <div style={{display:"flex",justifyContent:"center",gap:20}}>
             <div style={{textAlign:"center"}}>
-              <div style={{fontSize:24,fontWeight:900,color:T.cyan,fontFamily:T.mono}}>{ori}%</div>
+              <div style={{fontSize:18,fontWeight:900,color:T.cyan,fontFamily:T.mono}}>{ori}%</div>
               <div style={{fontSize:9,color:T.txtD,fontFamily:T.mono,marginTop:2}}>OFFSHORE RI</div>
             </div>
             <div style={{textAlign:"center"}}>
-              <div style={{fontSize:24,fontWeight:900,color:T.amber,fontFamily:T.mono}}>{oni}%</div>
+              <div style={{fontSize:18,fontWeight:900,color:T.amber,fontFamily:T.mono}}>{oni}%</div>
               <div style={{fontSize:9,color:T.txtD,fontFamily:T.mono,marginTop:2}}>ONSHORE RI</div>
             </div>
           </div>
         </div>
 
-        <div style={{padding:"20px"}}>
+        <div style={{padding:"14px",borderRadius:16}}>
           <div style={{fontSize:9,color:T.violet,fontFamily:T.mono,letterSpacing:2,marginBottom:16}}>
             PROGRESSION LADDER
           </div>
@@ -1067,7 +1068,7 @@ function AuthorityMatrix({scores,status}) {
 /* ══════════════════════════════════════════════════════════════════
    APP
 ══════════════════════════════════════════════════════════════════ */
-const INIT = {wave:28,sacs:0,api:0,offgeo:0,rcc:32,steel:15,ongeo:18,epc:22};
+let INIT = {wave:28,sacs:0,api:0,offgeo:0,rcc:32,steel:15,ongeo:18,epc:22};
 const VIEWS = [
   {id:"cmd",    label:"COMMAND CENTER",      icon:"◈"},
   {id:"review", label:"REVIEW OPS",          icon:"◉"},
@@ -1077,26 +1078,47 @@ const VIEWS = [
 ];
 
 export default function App() {
+  
   const [view,setView]=useState("cmd");
-  const [scores,setScores]=useState(INIT);
-  const status=computeStatus(scores);
-  const auth=AUTH(scores);
 
-  useEffect(() => {
-    fetchScores()
-  }, [])
-  
-  async function fetchScores() {
-    const { data, error } = await supabase
-      .from('competency_scores')
-      .select('*')
-  
-    console.log(data)
-  
-    if (error) {
-      console.log(error)
-    }
+const [scores,setScores]=useState({
+  wave:0,
+  sacs:0,
+  api:0,
+  offgeo:0,
+  rcc:0,
+  steel:0,
+  ongeo:0,
+  epc:0
+});
+
+useEffect(() => {
+  fetchScores();
+}, []);
+
+async function fetchScores() {
+  const { data, error } = await supabase
+    .from('competency_scores')
+    .select('*');
+
+  if (error) {
+    console.log(error);
+    return;
   }
+
+  const mapped = {};
+
+  data.forEach((row) => {
+    mapped[row.domain] = row.score;
+  });
+
+  console.log("FETCHED:", mapped);
+
+  setScores(mapped);
+}
+
+const status=computeStatus(scores);
+const auth=AUTH(scores);
 
   return(
     <>
@@ -1155,7 +1177,8 @@ export default function App() {
               </div>
             ))}
           </div>
-          <TelemetryBar scores={scores} status={status}/>
+          
+<TelemetryBar scores={scores} status={status}/>
         </div>
 
         {/* Content */}
