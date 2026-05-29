@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { supabase } from './supabase'
 /* ══════════════════════════════════════════════════════════════════
@@ -527,25 +527,35 @@ function ReviewOps() {
   const [result,setResult] = useState(null);
   const scen = SCENARIOS[si];
 
+  // Supabase project ref — matches supabase.js
+  const EDGE_FN_URL = "https://jtkqagjrlqepiawgjktr.supabase.co/functions/v1/evaluate-review";
+  // The anon key is public-safe; the real secret (ANTHROPIC_API_KEY) lives server-side
+  const SUPABASE_ANON_KEY = "sb_publishable_khYOSio3LkccZhcRonV0wg_8i-YAikk";
+
   const evaluate = async () => {
     if(!input.trim()||loading) return;
     setLoading(true); setResult(null);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
+      const res = await fetch(EDGE_FN_URL, {
         method:"POST",
-        headers:{"Content-Type":"application/json"},
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":`Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body:JSON.stringify({
-          model:"claude-sonnet-4-20250514", max_tokens:1000,
-          system: scen.sp,
-          messages:[{role:"user",content:`My engineering review comments:\n\n${input}`}]
+          systemPrompt: scen.sp,
+          userInput: `My engineering review comments:\n\n${input}`,
         })
       });
+      if(!res.ok) {
+        const err = await res.json().catch(()=>({error:"Unknown server error"}));
+        throw new Error(err.error||`HTTP ${res.status}`);
+      }
       const data = await res.json();
-      const text = (data.content||[]).map(b=>b.text||"").join("");
-      const clean = text.replace(/```json|```/g,"").trim();
-      setResult(JSON.parse(clean));
+      if(data.error) throw new Error(data.error);
+      setResult(data);
     } catch(e) {
-      setResult({error:true,feedback:"Evaluation service error. Ensure valid JSON was returned.",overallScore:0});
+      setResult({error:true,feedback:`Evaluation error: ${e.message}`,overallScore:0});
     }
     setLoading(false);
   };
@@ -1092,9 +1102,26 @@ const [scores,setScores]=useState({
   epc:0
 });
 
+// track when initial load from Supabase is complete so the save effect
+// doesn't fire on the very first setScores call
+const loadedRef = useRef(false);
+
 useEffect(() => {
   fetchScores();
 }, []);
+
+// debounced save — fires 800 ms after the last slider move
+useEffect(() => {
+  if (!loadedRef.current) return;
+  const timer = setTimeout(async () => {
+    const rows = Object.entries(scores).map(([domain, score]) => ({ domain, score }));
+    const { error } = await supabase
+      .from('competency_scores')
+      .upsert(rows, { onConflict: 'domain' });
+    if (error) console.error('Score save error:', error);
+  }, 800);
+  return () => clearTimeout(timer);
+}, [scores]);
 
 async function fetchScores() {
   const { data, error } = await supabase
@@ -1115,6 +1142,7 @@ async function fetchScores() {
   console.log("FETCHED:", mapped);
 
   setScores(mapped);
+  loadedRef.current = true; // allow save effect to run from this point on
 }
 
 const status=computeStatus(scores);
